@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Preprocessing Pipeline - Animated Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Arial', sans-serif;
+            overflow-x: auto;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 1200px;
+            height: 800px;
+            margin: 20px auto;
+            position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #f1f5f9;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            to { text-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+        }
+
+        .pipeline-stage {
+            position: absolute;
+            width: 200px;
+            height: 140px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(100, 116, 139, 0.5);
+            padding: 20px;
+            color: #f1f5f9;
+            opacity: 0;
+            animation: stageAppear 1s ease-out forwards;
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-stage:hover {
+            transform: scale(1.05);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .stage-1 {
+            top: 100px;
+            left: 50px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.1) 100%);
+            animation-delay: 0.5s;
+        }
+
+        .stage-2 {
+            top: 100px;
+            left: 300px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.1) 100%);
+            animation-delay: 1s;
+        }
+
+        .stage-3 {
+            top: 100px;
+            left: 550px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%);
+            animation-delay: 1.5s;
+        }
+
+        .stage-4 {
+            top: 100px;
+            left: 800px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
+            animation-delay: 2s;
+        }
+
+        @keyframes stageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stage-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stage-content {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .data-flow {
+            position: absolute;
+            top: 170px;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 2px;
+            opacity: 0;
+            animation: flowMove 2s ease-in-out infinite;
+        }
+
+        .flow-1 { left: 250px; animation-delay: 2.5s; }
+        .flow-2 { left: 500px; animation-delay: 3s; }
+        .flow-3 { left: 750px; animation-delay: 3.5s; }
+
+        @keyframes flowMove {
+            0% {
+                opacity: 0;
+                width: 0;
+            }
+            50% {
+                opacity: 1;
+                width: 100px;
+            }
+            100% {
+                opacity: 0;
+                width: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        .data-visualization {
+            position: absolute;
+            top: 300px;
+            left: 50px;
+            width: 500px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.6) 0%, rgba(71, 85, 105, 0.4) 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(100, 116, 139, 0.5);
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 4s forwards;
+        }
+
+        .metrics-panel {
+            position: absolute;
+            top: 300px;
+            right: 50px;
+            width: 500px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.6) 0%, rgba(71, 85, 105, 0.4) 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(100, 116, 139, 0.5);
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 4.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #1f2937;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 2s ease-in-out;
+            animation: progressFill 3s ease-in-out infinite;
+        }
+
+        .progress-raw { background: #ef4444; }
+        .progress-clean { background: #10b981; }
+        .progress-final { background: #22c55e; }
+
+        @keyframes progressFill {
+            0% { width: 0%; }
+            100% { width: var(--target-width); }
+        }
+
+        .data-blocks {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .data-block {
+            width: 60px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 2px;
+            opacity: 0.7;
+            animation: blockPulse 2s ease-in-out infinite;
+        }
+
+        .data-block.clean {
+            background: #10b981;
+        }
+
+        @keyframes blockPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .tools-grid {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            opacity: 0;
+            animation: toolsAppear 1s ease-out 5s forwards;
+        }
+
+        .tool-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            color: white;
+            transform: scale(0);
+            animation: toolPop 0.5s ease-out forwards;
+        }
+
+        .tool-pandas { background: #3b82f6; animation-delay: 5.2s; }
+        .tool-numpy { background: #f59e0b; animation-delay: 5.4s; }
+        .tool-sklearn { background: #8b5cf6; animation-delay: 5.6s; }
+        .tool-spark { background: #10b981; animation-delay: 5.8s; }
+        .tool-dask { background: #ef4444; animation-delay: 6s; }
+        .tool-tensorflow { background: #06b6d4; animation-delay: 6.2s; }
+
+        @keyframes toolsAppear {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        @keyframes toolPop {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #3b82f6;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 8s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .quality-indicator {
+            position: absolute;
+            top: 550px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: #10b981;
+            font-weight: bold;
+            opacity: 0;
+            animation: qualityShow 1s ease-out 6.5s forwards;
+        }
+
+        @keyframes qualityShow {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        .pulse-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #10b981;
+            border-radius: 50%;
+            top: 520px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation: pulse 2s ease-out 7s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translateX(-50%) scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) scale(2);
+                opacity: 0;
+            }
+        }
+
+        .restart-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="restart-btn" onclick="restartAnimation()">🔄 Restart Animation</button>
+        
+        <div class="floating-particles" id="particles"></div>
+        
+        <h1 class="title">DATA PREPROCESSING PIPELINE</h1>
+        
+        <!-- Pipeline Stages -->
+        <div class="pipeline-stage stage-1">
+            <div class="stage-title">🗃️ RAW DATA</div>
+            <div class="stage-content">
+                • Messy, inconsistent data<br>
+                • Missing values (NULL, NaN)<br>
+                • Duplicates & errors<br>
+                • Mixed formats<br>
+                • Outliers present
+            </div>
+        </div>
+        
+        <div class="pipeline-stage stage-2">
+            <div class="stage-title">🧹 DATA CLEANING</div>
+            <div class="stage-content">
+                ✓ Remove duplicates<br>
+                ✓ Handle missing values<br>
+                ✓ Fix inconsistencies<br>
+                ✓ Validate data types<br>
+                ✓ Remove outliers
+            </div>
+        </div>
+        
+        <div class="pipeline-stage stage-3">
+            <div class="stage-title">🔄 TRANSFORMATION</div>
+            <div class="stage-content">
+                ⚙️ Normalization<br>
+                ⚙️ Scaling (Min-Max, Z-score)<br>
+                ⚙️ Encoding categorical<br>
+                ⚙️ Discretization<br>
+                ⚙️ Feature selection
+            </div>
+        </div>
+        
+        <div class="pipeline-stage stage-4">
+            <div class="stage-title">🚀 FEATURE ENGINEERING</div>
+            <div class="stage-content">
+                + Create new features<br>
+                + Polynomial features<br>
+                + Interaction terms<br>
+                + Domain-specific features<br>
+                + Dimensionality reduction
+            </div>
+        </div>
+        
+        <!-- Data Flow Arrows -->
+        <div class="data-flow flow-1"></div>
+        <div class="data-flow flow-2"></div>
+        <div class="data-flow flow-3"></div>
+        
+        <!-- Data Visualization Panel -->
+        <div class="data-visualization">
+            <h3 style="color: #f1f5f9; margin-top: 0;">📊 Data Quality Evolution</h3>
+            
+            <div style="margin: 20px 0;">
+                <label style="color: #f1f5f9; font-size: 14px;">Raw Data Quality: 30%</label>
+                <div class="progress-bar">
+                    <div class="progress-fill progress-raw" style="--target-width: 30%;"></div>
+                </div>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label style="color: #f1f5f9; font-size: 14px;">Cleaned Data Quality: 80%</label>
+                <div class="progress-bar">
+                    <div class="progress-fill progress-clean" style="--target-width: 80%;"></div>
+                </div>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label style="color: #f1f5f9; font-size: 14px;">Final Data Quality: 95%</label>
+                <div class="progress-bar">
+                    <div class="progress-fill progress-final" style="--target-width: 95%;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Metrics Panel -->
+        <div class="metrics-panel">
+            <h3 style="color: #f1f5f9; margin-top: 0;">📈 Processing Metrics</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 140px;">
+                <div>
+                    <h4 style="color: #f1f5f9; margin: 0 0 10px 0;">Before Processing</h4>
+                    <div class="data-blocks">
+                        <div class="data-block" style="animation-delay: 4.5s;"></div>
+                        <div class="data-block" style="animation-delay: 4.7s;"></div>
+                        <div class="data-block" style="animation-delay: 4.9s;"></div>
+                        <div class="data-block" style="animation-delay: 5.1s;"></div>
+                        <div class="data-block" style="animation-delay: 5.3s;"></div>
+                    </div>
+                    <div style="color: #ef4444; font-size: 12px;">
+                        Missing: 25%<br>
+                        Duplicates: 15%<br>
+                        Errors: 10%
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="color: #f1f5f9; margin: 0 0 10px 0;">After Processing</h4>
+                    <div class="data-blocks">
+                        <div class="data-block clean" style="animation-delay: 4.5s;"></div>
+                        <div class="data-block clean" style="animation-delay: 4.7s;"></div>
+                        <div class="data-block clean" style="animation-delay: 4.9s;"></div>
+                        <div class="data-block clean" style="animation-delay: 5.1s;"></div>
+                        <div class="data-block clean" style="animation-delay: 5.3s;"></div>
+                    </div>
+                    <div style="color: #10b981; font-size: 12px;">
+                        Missing: 0%<br>
+                        Duplicates: 0%<br>
+                        Errors: 0%
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tools Grid -->
+        <div class="tools-grid">
+            <div class="tool-badge tool-pandas">pandas</div>
+            <div class="tool-badge tool-numpy">NumPy</div>
+            <div class="tool-badge tool-sklearn">scikit-learn</div>
+            <div class="tool-badge tool-spark">Apache Spark</div>
+            <div class="tool-badge tool-dask">Dask</div>
+            <div class="tool-badge tool-tensorflow">TensorFlow</div>
+        </div>
+        
+        <!-- Quality Indicator -->
+        <div class="quality-indicator">
+            ✅ DATA READY FOR MACHINE LEARNING
+        </div>
+        
+        <!-- Pulse Effect -->
+        <div class="pulse-effect"></div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                
+                // Random colors for particles
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Restart animation function
+        function restartAnimation() {
+            location.reload();
+        }
+        
+        // Initialize particles on load
+        window.addEventListener('load', createParticles);
+        
+        // Add interactive hover effects
+        document.querySelectorAll('.pipeline-stage').forEach(stage => {
+            stage.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05) translateZ(0)';
+                this.style.boxShadow = '0 20px 40px rgba(59, 130, 246, 0.3)';
+            });
+            
+            stage.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1) translateZ(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+        
+        // Animate progress bars with realistic timing
+        setTimeout(() => {
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                const targetWidth = bar.style.getPropertyValue('--target-width');
+                bar.style.width = targetWidth;
+            });
+        }, 4000);
+    </script>
+</body>
+</html>
